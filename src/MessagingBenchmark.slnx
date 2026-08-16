@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Benchmark.Brokers/Benchmark.Brokers.csproj" />
+  <Project Path="Benchmark.Contracts/Benchmark.Contracts.csproj" />
+  <Project Path="Benchmark.Runner/Benchmark.Runner.csproj" />
+</Solution>
