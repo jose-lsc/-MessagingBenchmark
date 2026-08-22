@@ -83,7 +83,8 @@ foreach (var (key, brokerName, factory) in selectedBrokers)
         var broker = factory(topicName);
 
         // 1. Prepara a topologia (fila/tópico) para o cenário.
-        await broker.PrepareAsync(scenario.Consumers);
+        // Usa Producers como número de partições para garantir paralelismo adequado.
+        await broker.PrepareAsync(scenario.Producers);
 
         // 2. Inscreve os consumers e devolve uma Task que completa
         //    quando todas as mensagens esperadas forem consumidas.
@@ -141,7 +142,7 @@ foreach (var (key, brokerName, factory) in selectedBrokers)
             MemoryMaxMB = resources.MemoryMaxMB
         };
 
-        results.Add(FormatCsv(benchmarkResult));
+        results.Add(FormatCsv(benchmarkResult, brokerName));
 
         PrintSummary(benchmarkResult);
 
@@ -190,10 +191,10 @@ static (double avg, double min, double max, double p95) ComputeLatencyStats(
     return (avg, min, max, p95);
 }
 
-static string FormatCsv(BenchmarkResult result)
+static string FormatCsv(BenchmarkResult result, string brokerName)
 {
     return string.Join(",",
-        "RabbitMQ",
+        brokerName,
         result.ScenarioId,
         result.MessageCount,
         result.MessageSizeBytes,
