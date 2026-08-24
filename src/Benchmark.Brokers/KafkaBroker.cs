@@ -23,7 +23,8 @@ public class KafkaBroker : IBenchmarkBroker
             new AdminClientConfig
             {
                 BootstrapServers = BrokerConfig.KafkaBootstrapServers
-            }).Build();
+            }
+        ).Build();
 
         await admin.CreateTopicsAsync(
         [

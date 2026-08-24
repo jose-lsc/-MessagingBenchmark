@@ -27,7 +27,7 @@ var brokers = new (string Key, string Name, Func<string, IBenchmarkBroker> Facto
 };
 
 // Filtros opcionais por argumentos:
-//   dotnet run --project src/Benchmark.Runner -- rabbitmq 1 3
+// dotnet run --project src/Benchmark.Runner -- rabbitmq 1 3
 var brokerFilter = args
     .Where(a => brokers.Any(b => b.Key.Equals(a, StringComparison.OrdinalIgnoreCase)))
     .Select(a => a.ToLowerInvariant())
@@ -83,8 +83,11 @@ foreach (var (key, brokerName, factory) in selectedBrokers)
         var broker = factory(topicName);
 
         // 1. Prepara a topologia (fila/tópico) para o cenário.
-        // Usa Producers como número de partições para garantir paralelismo adequado.
-        await broker.PrepareAsync(scenario.Producers);
+        // O número de partições é dimensionado pelo maior número de producers
+        // ou consumers para evitar que o particionamento seja um gargalo artificial
+        // no cenário de benchmark.
+        int partitionCount = Math.Max(scenario.Producers, scenario.Consumers);
+        await broker.PrepareAsync(partitionCount);
 
         // 2. Inscreve os consumers e devolve uma Task que completa
         //    quando todas as mensagens esperadas forem consumidas.
@@ -131,7 +134,7 @@ foreach (var (key, brokerName, factory) in selectedBrokers)
             Consumers = scenario.Consumers,
             MessagesPerSecond = scenario.MessagesPerSecond,
             TotalSeconds = totalSeconds,
-            Throughput = throughput,
+            Throughput = throughput, //Em segundos
             AverageLatencyMs = avgLatency,
             MinLatencyMs = minLatency,
             MaxLatencyMs = maxLatency,

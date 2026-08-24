@@ -1,4 +1,6 @@
 using Benchmark.Contracts;
+using DotPulsar;
+using System.Net.Http.Json;
 
 namespace Benchmark.Brokers;
 
@@ -17,10 +19,28 @@ public class PulsarBroker : IBenchmarkBroker
 
     public string Name => "Pulsar";
 
-    public Task PrepareAsync(int partitions)
+    public async Task PrepareAsync(int partitions)
     {
-        // O tópico do Pulsar é criado automaticamente no primeiro uso.
-        return Task.CompletedTask;
+        if (partitions <= 1)
+        {
+            return;
+        }
+
+        // Usa a REST API do Pulsar para criar tópico particionado
+        var httpClient = new HttpClient();
+        var adminUrl = BrokerConfig.PulsarServiceUrl.Replace("pulsar://", "http://").Replace(":6650", ":8080");
+        
+        var topicName = _topic.Replace("persistent://public/default/", "");
+        
+        var url = $"{adminUrl}/admin/v2/persistent/public/default/{topicName}/partitions";
+
+        var response = await httpClient.PutAsync(url, JsonContent.Create(partitions));
+       
+        if (!response.IsSuccessStatusCode)
+        {
+            var error = await response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException($"Failed to create partitioned topic: {error}");
+        }
     }
 
     public IProducer CreateProducer()

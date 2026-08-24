@@ -18,9 +18,9 @@ public class KafkaConsumer : IConsumer
             {
                 BootstrapServers = BrokerConfig.KafkaBootstrapServers,
                 GroupId = groupId,
-                AutoOffsetReset = AutoOffsetReset.Earliest,
-                EnableAutoCommit = true,
-                EnableAutoOffsetStore = true
+                AutoOffsetReset = AutoOffsetReset.Earliest, //Começa pela mensagem mais antiga disponível na partição.
+                EnableAutoCommit = true, //Marca no kafka o idnice consumido, marcando o progresso dos dados.
+                EnableAutoOffsetStore = true // Armazena o offset da mensagem lida, para ser marcada como comitada depois.
             }).Build();
     }
 
