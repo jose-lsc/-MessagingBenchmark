@@ -10,11 +10,10 @@ Comparar RabbitMQ, Apache Kafka e Apache Pulsar utilizando uma aplicação desen
 - Latência
 - Uso de CPU
 - Uso de Memória
-- Confiabilidade
 
 Tecnologias
 
-- .NET 8
+- .NET 10
 - Docker
 - RabbitMQ
 - Apache Kafka
