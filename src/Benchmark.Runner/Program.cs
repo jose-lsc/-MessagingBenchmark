@@ -57,7 +57,8 @@ foreach (var (key, brokerName, factory) in selectedBrokers)
     {
         "Broker,Cenario,Mensagens,TamanhoBytes,Producers,Consumers,TaxaMsgSeg,"
             + "TempoSegundos,ThroughputMsgSeg,LatenciaMediaMs,LatenciaMinMs,"
-            + "LatenciaMaxMs,LatenciaP95Ms,CpuMediaPct,CpuMaxPct,MemoriaMediaMB,MemoriaMaxMB"
+            + "LatenciaMaxMs,LatenciaP95Ms,CpuMediaPct,CpuMaxPct,MemoriaMediaMB,MemoriaMaxMB,"
+            + "DiscoReadMB,DiscoWriteMB,DiscoTotalMB"
     };
 
     foreach (var scenario in selectedScenarios)
@@ -99,8 +100,11 @@ foreach (var (key, brokerName, factory) in selectedBrokers)
             scenario.MessageCount,
             broker);
 
-        // 3. Liga o monitor de CPU e memória do processo.
-        using var resources = new ResourceMonitor();
+        // 3. Liga o monitor de CPU do BROKER (container Docker).
+        //    Antes media o processo Runner (bug). Agora mede o container do broker.
+        //    'key' coincide com container_name no docker-compose.yml (rabbitmq/kafka/pulsar).
+        string containerName = BrokerContainers.FromKey(key);
+        using var resources = new ResourceMonitor(containerName);
         resources.Start();
 
         // 4. Produz as mensagens (pipeline completo: produção + consumo).
@@ -142,7 +146,10 @@ foreach (var (key, brokerName, factory) in selectedBrokers)
             CpuAveragePercent = resources.CpuAveragePercent,
             CpuMaxPercent = resources.CpuMaxPercent,
             MemoryAverageMB = resources.MemoryAverageMB,
-            MemoryMaxMB = resources.MemoryMaxMB
+            MemoryMaxMB = resources.MemoryMaxMB,
+            DiskReadMB = resources.DiskReadMB,
+            DiskWriteMB = resources.DiskWriteMB,
+            DiskTotalMB = resources.DiskTotalMB
         };
 
         results.Add(FormatCsv(benchmarkResult, brokerName));
@@ -213,7 +220,10 @@ static string FormatCsv(BenchmarkResult result, string brokerName)
         result.CpuAveragePercent.ToString("F2", CultureInfo.InvariantCulture),
         result.CpuMaxPercent.ToString("F2", CultureInfo.InvariantCulture),
         result.MemoryAverageMB.ToString("F2", CultureInfo.InvariantCulture),
-        result.MemoryMaxMB.ToString("F2", CultureInfo.InvariantCulture));
+        result.MemoryMaxMB.ToString("F2", CultureInfo.InvariantCulture),
+        result.DiskReadMB.ToString("F2", CultureInfo.InvariantCulture),
+        result.DiskWriteMB.ToString("F2", CultureInfo.InvariantCulture),
+        result.DiskTotalMB.ToString("F2", CultureInfo.InvariantCulture));
 }
 
 static void PrintSummary(BenchmarkResult result)
@@ -231,4 +241,6 @@ static void PrintSummary(BenchmarkResult result)
     Console.WriteLine(
         $"Memória     : média {result.MemoryAverageMB:F1} MB | " +
         $"máx {result.MemoryMaxMB:F1} MB");
+    Console.WriteLine(
+        $"Disco       : read {result.DiskReadMB:F1} MB | write {result.DiskWriteMB:F1} MB | total {result.DiskTotalMB:F1} MB (Block I/O durante o teste)");
 }

@@ -21,4 +21,14 @@ public class BenchmarkResult
     public double CpuMaxPercent { get; set; }
     public double MemoryAverageMB { get; set; }
     public double MemoryMaxMB { get; set; }
+
+    // Block I/O durante o benchmark (delta, não acumulado) — em MB
+    public double DiskReadMB { get; set; }
+    public double DiskWriteMB { get; set; }
+    public double DiskTotalMB { get; set; }
+
+    [Obsolete("DiskAverageMB era média de contador acumulado e foi substituído por DiskTotalMB/Read/Write (delta).")]
+    public double DiskAverageMB { get; set; }
+    [Obsolete("DiskMaxMB era máximo de contador acumulado e foi substituído por DiskTotalMB/Read/Write (delta).")]
+    public double DiskMaxMB { get; set; }
 }
