@@ -15,7 +15,7 @@ var scenarios = new List<Scenario>
     new() { Id = 7, MessageCount = 100_000, MessageSizeBytes = 1_000, Producers = 1, Consumers = 4, MessagesPerSecond = 0 },
     new() { Id = 8, MessageCount = 100_000, MessageSizeBytes = 1_000, Producers = 4, Consumers = 1, MessagesPerSecond = 0 },
     new() { Id = 9, MessageCount = 100_000, MessageSizeBytes = 1_000, Producers = 4, Consumers = 4, MessagesPerSecond = 0 },
-    new() { Id = 10, MessageCount = 30_000, MessageSizeBytes = 1_000, Producers = 1, Consumers = 1, MessagesPerSecond = 2_000 },
+    new() { Id = 10, MessageCount = 40_000, MessageSizeBytes = 1_000, Producers = 1, Consumers = 1, MessagesPerSecond = 2_000 },
     new() { Id = 11, MessageCount = 40_000, MessageSizeBytes = 1_000, Producers = 1, Consumers = 1, MessagesPerSecond = 8_000 }
 };
 
